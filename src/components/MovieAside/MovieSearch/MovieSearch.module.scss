@@ -17,3 +17,25 @@
     color: rgba(0, 0, 0, 0.46);
   }
 }
+
+.modalWindow {
+  width: 100%;
+  height: 300px;
+  overflow: auto;
+  padding-right: 7px;
+
+  & li {
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    margin: 8px 0px;
+
+    &:first-child {
+      margin-top: 0px;
+    }
+
+    & button {
+      width: 100%;
+    }
+  }
+}

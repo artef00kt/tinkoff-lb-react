@@ -1,26 +1,37 @@
-import {useContext, useEffect, useState, useRef} from 'react';
-import {MovieContext} from '../../../context/MovieContext';
+import { useContext, useEffect, useState, useRef } from 'react';
+import { MovieContext } from '../../../context/MovieContext';
 import useDebounce from '../../../hooks/useDebounce';
-import {fetchMovies} from '../../App/App.service';
+import { fetchMovies } from '../../App/App.service';
 
 import Button from '../../Button/Button';
-import {Modal} from '../../Modal/Modal';
+import { Modal } from '../../Modal/Modal';
 import styles from './MovieSearch.module.scss';
 
 export const MovieSearch = () => {
   const [value, setValue] = useState('');
-  const {debounceValue} = useDebounce(value, 500);
+  const { debounceValue } = useDebounce(value, 500);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const {setMovies, filters, setFilters} = useContext(MovieContext);
+  const { setMovies, filters, setFilters } = useContext(MovieContext);
+
+  const [filterList, setFilterList] = useState([]);
 
   const anchor = useRef();
 
-  const isHistoryFilterOn = !!filters.includes('History');
-  const isDramaFilterOn = !!filters.includes('Drama');
+  useEffect(() => {
+    fetchMovies(`http://localhost:3010/genres`).then((res) => {
+      setFilterList(res);
+    });
+  }, []);
+
+  const filteredListObj = {};
+  filterList.forEach(function (item, i, res) {
+    filteredListObj[item] = !!filters.includes(item);
+  });
 
   const toggleFilter = (filter: string) => {
     setFilters((prevFilters: string[]) => {
+
       if (prevFilters.includes(filter)) {
         return prevFilters.filter((item) => item !== filter);
       }
@@ -53,14 +64,15 @@ export const MovieSearch = () => {
       </div>
 
       <Modal isOpen={isModalOpen} anchor={anchor} onClose={() => setIsModalOpen(false)}>
-        <div style={{display: 'flex', gap: 8}}>
-          <Button secondary={isDramaFilterOn} type="button" onClick={() => toggleFilter('Drama')}>
-            Драма
-          </Button>
-          <Button secondary={isHistoryFilterOn} type="button" onClick={() => toggleFilter('History')}>
-            История
-          </Button>
-        </div>
+        <ul className={styles.modalWindow}>
+          {filterList.map((filterName, index) => (
+            <li key={index}>
+              <Button secondary={!filteredListObj[filterName]} type="button" onClick={() => toggleFilter(filterName)}>
+                {filterName}
+              </Button>
+            </li>
+          ))}
+        </ul>
       </Modal>
     </form>
   );

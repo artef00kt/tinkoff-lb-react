@@ -6,11 +6,16 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-.header-container {
+.headerContainer {
     width: 100%;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
+    flex-direction: row;
+
+    & button {
+        margin-right: 12px;
+    }
 }
 
 .logo {

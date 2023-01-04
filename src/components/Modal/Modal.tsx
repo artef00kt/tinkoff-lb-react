@@ -25,7 +25,7 @@ export const Modal: React.FC<ModalProps> = ({isOpen, onClose, anchor, children})
       <div
         className={styles.modalContent}
         onClick={(e) => e.stopPropagation()}
-        style={{top: bottom + 10, right: right}}>
+        style={{top: bottom + 10, right: 1920 - right}}>
         {children}
       </div>
     </div>
