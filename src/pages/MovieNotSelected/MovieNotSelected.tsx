@@ -1,10 +1,12 @@
 import React from 'react';
-import styles from './PlugNotSelectMovie.module.scss';
+import styles from './MovieNotSelected.module.scss';
 
-export const PlugNotSelectMovie = () => {
+const MovieNotSelected = () => {
   return (
     <div className={styles.container}>
       <span className={styles.placeholder}>Выберите фильм</span>
     </div>
   );
 };
+
+export default MovieNotSelected;
