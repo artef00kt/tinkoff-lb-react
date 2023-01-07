@@ -16,7 +16,7 @@ export const MovieSearch = () => {
 
   const [filterList, setFilterList] = useState([]);
 
-  const anchor = useRef();
+  const anchorFiltrationButton = useRef();
 
   useEffect(() => {
     fetchMovies(`http://localhost:3010/genres`).then((res) => {
@@ -57,13 +57,13 @@ export const MovieSearch = () => {
         placeholder="Введите название фильма"
       />
 
-      <div ref={anchor}>
+      <div ref={anchorFiltrationButton}>
         <Button secondary type="button" onClick={() => setIsModalOpen(true)}>
           Филтьтры
         </Button>
       </div>
 
-      <Modal isOpen={isModalOpen} anchor={anchor} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={isModalOpen} anchor={anchorFiltrationButton} onClose={() => setIsModalOpen(false)}>
         <ul className={styles.modalWindow}>
           {filterList.map((filterName, index) => (
             <li key={index}>

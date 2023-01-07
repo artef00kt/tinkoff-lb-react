@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchMovies } from '../../components/App/App.service';
 import Button from '../../components/Button/Button';
@@ -6,6 +6,9 @@ import styles from './MovieEdit.module.scss';
 import { MovieContext } from '../../context/MovieContext';
 
 const MovieEdit = () => {
+  const pathName = window.location.pathname;
+  const isEditPage = pathName !== "/movie/create";
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { setMovies } = useContext(MovieContext);
@@ -20,7 +23,7 @@ const MovieEdit = () => {
   const [genresListState, setGenresListState] = useState([]);
 
   const genresListObj = {};
-  genresList.forEach(function (item, i, res) {
+  genresList.forEach(function (item) {
     genresListObj[item] = !!genresListState.includes(item);
   });
 
@@ -46,36 +49,60 @@ const MovieEdit = () => {
     posterUrl: '',
   });
 
-  useEffect(() => {
-    fetchMovies(`http://localhost:3010/movies/${id}`).then((movie) => {
-      setForm(movie);
-      movie.genres.map((gN) => {toggleGenre(gN)});
-    });
-  }, [id]);
+  
+    useEffect(() => {
+      if (isEditPage)
+      {
+        fetchMovies(`http://localhost:3010/movies/${id}`).then((movie) => {
+          setForm(movie);
+          movie.genres.map((genreName) => {toggleGenre(genreName)});
 
-  const onChangeForm = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+        });
+      }
+      else
+      {
+        const baseForm = {
+          title: '',
+          year: '',
+          runtime: '',
+          genres: [],
+          director: '',
+          actors: '',
+          plot: '',
+          posterUrl: '',
+        }
+        setForm(baseForm);
+        setGenresListState([]);
+      }
+    }, [id]);
 
-  const onSubmitForm = (e) => {
+  const onChangeForm = useCallback( (e) =>  setForm({ ...form, [e.target.name]: e.target.value }), [form]);
+
+  const onSubmitForm = async (e) => {
     e.preventDefault();
 
     form.genres = genresListState;
 
-    fetchMovies(`http://localhost:3010/movies/${id}`, {
-      method: 'PATCH',
+    await fetchMovies(isEditPage ?  `http://localhost:3010/movies/${id}` : 'http://localhost:3010/movies', {
+      method: isEditPage ? 'PATCH' : 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ ...form }),
-    }).then(() => {
-      fetchMovies(`http://localhost:3010/movies`).then((movies) => { setMovies(movies); });
-      navigate(`/movie/${id}`);
     });
+
+    await fetchMovies(`http://localhost:3010/movies`)
+    .then((movies) => { 
+      setMovies(movies); 
+    });
+
+    navigate(isEditPage ? `/movie/${id}` : `/`);
   };
 
   return (
     <section className={styles.container}>
       <form className={styles.inputForm} onSubmit={onSubmitForm}>
-        <h3 className={styles.title}>Редактирование фильма #{id}</h3>
+        <h3 className={styles.title}>{isEditPage ? `Редактирование фильма #${id}` : `Добавление фильма`}</h3>
         <Input onChange={onChangeForm} value={form.title} name={'title'} />
         <Input onChange={onChangeForm} value={form.year} name={'year'} />
         <Input onChange={onChangeForm} value={form.runtime} name={'runtime'} />
@@ -94,7 +121,7 @@ const MovieEdit = () => {
         <InputTextarea onChange={onChangeForm} value={form.plot} name={'plot'} />
         <Input onChange={onChangeForm} value={form.posterUrl} name={'posterUrl'} />
 
-        <Button type={'submit'}>Сохранить</Button>
+        <Button type={'submit'}>{isEditPage ? "Сохранить" : "Добавить"}</Button>
       </form>
     </section>
   );
